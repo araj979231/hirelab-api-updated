@@ -1,5 +1,6 @@
 import { BlogResponse } from "@/types/blog";
 
+
 export const queries = {
   getBlogs: {
     query: () => ({
@@ -30,5 +31,12 @@ export const queries = {
       url : "api/recent-jobs",
       method : "GET"
     })
-  }
+  },
+  getDiscussions: {
+    query: () => ({
+      url: "api/get-discussions",
+      method: "GET",
+    }),
+  },
+ 
 };

@@ -1,10 +1,10 @@
-import { BlogResponse, EventResponse,SectorResponse,WritableRecentJobResponse } from "@/types/index";
+import { BlogResponse, EventResponse,SectorResponse,WritableRecentJobResponse, DiscussionResponse } from "@/types/index";
 
 import { hirelabApiSlice } from "@/rtk/base-query";
 import { queries } from "./global.api";
 
 const hirelabEnhancedSlice = hirelabApiSlice.enhanceEndpoints({
-  addTagTypes: ["Blogs", "Events",'Sector','RecentJobs'],
+  addTagTypes: ["Blogs", "Events",'Sector','RecentJobs',"Discussions",],
 });
 
 const globalApi = hirelabEnhancedSlice.injectEndpoints({
@@ -28,8 +28,14 @@ const globalApi = hirelabEnhancedSlice.injectEndpoints({
     getRecentJobs :builder.query<WritableRecentJobResponse,void>({
       query: queries.getRecentJobs.query,
       providesTags: ["RecentJobs"],
-    })
+    }),
+    getDiscussions: builder.query<DiscussionResponse, void>({
+      query: queries.getDiscussions.query,
+      providesTags: ["Discussions"],
+    }),
+ 
   }),
+  
   overrideExisting: true,
 });
 
@@ -38,6 +44,7 @@ export const {
   useGetBlogsDataByIdQuery,
   useGetEventsQuery,
   useGetSectorQuery,
-  useGetRecentJobsQuery
+  useGetRecentJobsQuery,
+  useGetDiscussionsQuery
 } = globalApi;
 export default globalApi;

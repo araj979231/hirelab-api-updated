@@ -6,7 +6,7 @@ import { useGetRecentJobsQuery } from "@/store/global-store/global.query";
 
 const RecentJobsection = () => {
   const { data: recentJob, isLoading, isError } = useGetRecentJobsQuery();
-  console.log("recentJob", recentJob);
+  console.log("recentJob", useGetRecentJobsQuery());
   return (
     <div className="section-full bg-white content-inner-2">
       <div className="container">
@@ -29,7 +29,7 @@ const RecentJobsection = () => {
               {recentJob?.data?.map((item: JobPost, index: number) => (
                 <li key={index}>
                   <div className="post-bx">
-                    <div className="d-flex m-b30">
+                    <div className="d-flex m-b30">  
                       <div className="job-post-company">
                         <span>
                           <Image alt="" src={item.image} />

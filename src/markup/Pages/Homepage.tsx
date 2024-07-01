@@ -17,7 +17,7 @@ import {
   selectLoginErrors,
 } from "@/app/login/store/login.selectors";
 import UpComingMeetings from './UpComingMeetings'
-
+import { useGetDiscussionsQuery } from "@/store/global-store/global.query";
 //Images
 var bnr2 = require("./../../images/background/bg4.jpg");
 var bnr3 = require("./../../images/lines.png");
@@ -26,7 +26,8 @@ var bnr9 = require("./../../images/background/bg-9-new.jpeg");
 
 function Homepage() {
   const authState = useSelector(selectLoginState);
-  console.log("authState", authState);
+  const { data: discussion, isLoading, isError } = useGetDiscussionsQuery();
+  console.log("authState", discussion?.data);
 
   return (
     <div className="page-wraper">

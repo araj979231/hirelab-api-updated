@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { BlogsState, BlogResponse, EventsState, EventResponse, SectorState, RecentJobsState, WritableRecentJobResponse, SectorResponse } from '@/types/index';
+import { BlogsState, BlogResponse, EventsState, EventResponse, SectorState, RecentJobsState,  SectorResponse } from '@/types/blog';
+import { Discussion , DiscussionResponse , DiscussionsState } from '@/types/discussions';
 
 // Define initial states for both blogs and events
 const initialBlogsState: BlogsState = {
@@ -26,6 +27,12 @@ const initialRecentJobsState: RecentJobsState = {
   recenterror: null,
 };
 
+const initialDiscussionsState: DiscussionsState = {
+  discussions: [],
+  discussionsloading: false,
+  discussionserror: null,
+};
+
 const globalSlice = createSlice({
   name: 'global',
   initialState: {
@@ -33,6 +40,7 @@ const globalSlice = createSlice({
     ...initialEventsState,
     ...initialSectorState,
     ...initialRecentJobsState,
+    ...initialDiscussionsState,
   },
   reducers: {
     // Reducers for managing blogs state
@@ -90,8 +98,22 @@ const globalSlice = createSlice({
       state.recentloading = false;
       state.recenterror = action.payload;
     },
+    fetchDiscussionsStart: (state) => {
+      state.discussionsloading = true;
+      state.discussionserror = null;
+    },
+
+    fetchDiscussionsSuccess: (state, action: PayloadAction<DiscussionResponse>) => {
+      state.discussions = action.payload.data;
+      state.discussionsloading = false;
+    },
+    fetchDiscussionsFailure: (state, action: PayloadAction<string>) => {
+      state.discussionsloading = false;
+      state.discussionserror = action.payload;
+    },
   },
 });
+
 
 export const {
   fetchBlogsStart,
@@ -106,6 +128,9 @@ export const {
   fetchRecentJobsStart,
   fetchRecentJobsSuccess,
   fetchRecentJobsFailure,
+  fetchDiscussionsStart,
+  fetchDiscussionsSuccess,
+  fetchDiscussionsFailure,
 } = globalSlice.actions;
 
 export const globalEventReducer = globalSlice.reducer;

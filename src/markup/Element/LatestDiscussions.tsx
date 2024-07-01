@@ -1,7 +1,9 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import CountUp from "react-countup";
 import styles from "@/styles/LatestDiscussions.module.css";
-import { discussions } from "@/data/latestDiscussions";
+import { useDispatch, useSelector } from "react-redux";
+import { useGetDiscussionsQuery } from "@/store/global-store/global.query";
 
 const LatestDiscussions = () => {
   // State for dynamic counters
@@ -33,12 +35,15 @@ const LatestDiscussions = () => {
     return () => clearInterval(interval);
   }, [questionsPosted, answersGiven]);
 
+  const { data: discussions, isLoading, isError } = useGetDiscussionsQuery();
+  console.log("discussion data", discussions?.data);
+
   return (
     <div className="container">
       <div className="section-head d-flex justify-content-between align-items-center mb-4">
         <div className="mr-auto">
           <h2 style={{ fontWeight: "600" }} className="mb-2">
-            Latest discussion
+            Latest Discussions
           </h2>
         </div>
         <div className="d-flex">
@@ -80,27 +85,33 @@ const LatestDiscussions = () => {
       <div className="row align-items-center mb-4">
         <div className="col"></div>
         <div className="col text-right">
-          <button className="site-button button-md" style={{ backgroundColor:"#2A6310", color:"#fff", borderColor:"#2A8310"}}>View All</button>
+          <button
+            className="site-button button-md"
+            style={{
+              backgroundColor: "#2A6310",
+              color: "#fff",
+              borderColor: "#2A8310",
+            }}
+          >
+            View All
+          </button>
         </div>
       </div>
       <div className="row">
-        {discussions?.map((discussion) => (
+        {isLoading && <p>Loading discussions...</p>}
+        {isError && <p>Error loading discussions</p>}
+        {discussions?.data[0].map((discussion: any) => (
           <div key={discussion.id} className="col-lg-4 col-md-6 mb-4">
-            <div className={`card ${styles.discussionCard}`}>
+            <div className={`card ${styles.discussionCard}`}>''
               <div className="card-body">
                 <p className="text-muted mb-2">
-                  {discussion.date} | {discussion.time}
+                  {discussion.created_at}
                 </p>
-                <h5 className="card-title">{discussion.title}</h5>
+                <h5 className="card-title">{discussion.question}</h5>
                 <p className="card-text">{discussion.description}</p>
                 <div className="d-flex justify-content-between align-items-center mt-3">
                   <div className="d-flex align-items-center">
-                    <span className="ml-2">by {discussion.author}</span>
-                  </div>
-                  <div className="d-flex">
-                    <span className="mr-3">❤️ {discussion.likes}</span>
-                    <span className="mr-3">💬 {discussion.comments}</span>
-                    <span>👀 {discussion.views}</span>
+                    {/* <span className="ml-2">by {discussion.author}</span> */}
                   </div>
                 </div>
               </div>
