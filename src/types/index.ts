@@ -1,5 +1,8 @@
 export * from './blog'
 export * from './recent'
-export * from './discussions'
-export * from './recent'
-
+export * from './college'
+export * from './ctc'
+export * from './industry'
+export * from './discussion'
+export * from  './apply'
+export * from './testimonial'

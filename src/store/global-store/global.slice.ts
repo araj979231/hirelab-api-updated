@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { BlogsState, BlogResponse, EventsState, EventResponse, SectorState, RecentJobsState,  SectorResponse } from '@/types/blog';
-import { Discussion , DiscussionResponse , DiscussionsState } from '@/types/discussions';
+import { BlogsState, BlogResponse, EventsState, EventResponse, SectorState, RecentJobsState,GetJobsState,
+   WritableRecentJobResponse, SectorResponse,ApplyJobState,ApplyJobResponse,SaveJobDataState,SaveJobDataResponse } from '@/types/index';
 
 // Define initial states for both blogs and events
 const initialBlogsState: BlogsState = {
@@ -27,12 +27,22 @@ const initialRecentJobsState: RecentJobsState = {
   recenterror: null,
 };
 
-const initialDiscussionsState: DiscussionsState = {
-  discussions: [],
-  discussionsloading: false,
-  discussionserror: null,
+const initialGetJobsState: GetJobsState = {
+  jobs: [],
+  jobsloading: false,
+  jobserror: null,
 };
 
+const initialApplyJobState: ApplyJobState = {
+  applyJob: [],
+  applyJobLoading: false,
+  applyJobError: null,
+};
+const initialSaveJobState: SaveJobDataState = {
+  saveJob: [],
+  saveJobLoading: false,
+  saveJobError: null,
+};
 const globalSlice = createSlice({
   name: 'global',
   initialState: {
@@ -40,7 +50,9 @@ const globalSlice = createSlice({
     ...initialEventsState,
     ...initialSectorState,
     ...initialRecentJobsState,
-    ...initialDiscussionsState,
+    ...initialGetJobsState,
+    ...initialApplyJobState,
+    ...initialSaveJobState
   },
   reducers: {
     // Reducers for managing blogs state
@@ -98,18 +110,47 @@ const globalSlice = createSlice({
       state.recentloading = false;
       state.recenterror = action.payload;
     },
-    fetchDiscussionsStart: (state) => {
-      state.discussionsloading = true;
-      state.discussionserror = null;
+
+    // get jobs state
+    fetchGetJobsStart: (state) => {
+      state.recentloading = true;
+      state.recenterror = null;
+    },
+    fetchGetJobsSuccess: (state, action: PayloadAction<WritableRecentJobResponse>) => {
+      state.recent = action.payload.data;
+      state.recentloading = false;
+    },
+    fetchGetJobsFailure: (state, action: PayloadAction<string>) => {
+      state.recentloading = false;
+      state.recenterror = action.payload;
     },
 
-    fetchDiscussionsSuccess: (state, action: PayloadAction<DiscussionResponse>) => {
-      state.discussions = action.payload.data;
-      state.discussionsloading = false;
+     // Reducers for managing applyJob state
+     fetchApplyJobStart: (state) => {
+      state.applyJobLoading = true;
+      state.applyJobError = null;
     },
-    fetchDiscussionsFailure: (state, action: PayloadAction<string>) => {
-      state.discussionsloading = false;
-      state.discussionserror = action.payload;
+    fetchApplyJobSuccess: (state, action: PayloadAction<ApplyJobResponse>) => {
+      state.applyJob = action.payload.data;
+      state.applyJobLoading = false;
+    },
+    fetchApplyJobFailure: (state, action: PayloadAction<string>) => {
+      state.applyJobLoading = false;
+      state.applyJobError = action.payload;
+    },
+
+     // Reducers for  saveJob state
+     fetchSaveJobStart: (state) => {
+      state.saveJobLoading = true;
+      state.saveJobError = null;
+    },
+    fetchSaveJobSuccess: (state, action: PayloadAction<SaveJobDataResponse>) => {
+      state.saveJob = action.payload.data;
+      state.saveJobLoading = false;
+    },
+    fetchSaveJobFailure: (state, action: PayloadAction<string>) => {
+      state.saveJobLoading = false;
+      state.saveJobError = action.payload;
     },
   },
 });
@@ -128,9 +169,12 @@ export const {
   fetchRecentJobsStart,
   fetchRecentJobsSuccess,
   fetchRecentJobsFailure,
-  fetchDiscussionsStart,
-  fetchDiscussionsSuccess,
-  fetchDiscussionsFailure,
+  fetchGetJobsStart,
+  fetchGetJobsSuccess,
+  fetchGetJobsFailure,
+  fetchSaveJobStart,
+  fetchSaveJobSuccess,
+  fetchSaveJobFailure
 } = globalSlice.actions;
 
 export const globalEventReducer = globalSlice.reducer;

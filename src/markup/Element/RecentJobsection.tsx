@@ -1,12 +1,61 @@
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { postBlog, JobPost } from "@/data/jobsection";
+import Swal from "sweetalert2";
 import { useGetRecentJobsQuery } from "@/store/global-store/global.query";
+import { RecentJobData } from "@/types/index";
+import { formaterDate } from "@/utils/formateDate";
+import { usePostSaveJobMutation } from "@/store/global-store/global.query";
+import { useDispatch } from "react-redux";
+import { fetchRecentJobsStart } from "@/store/global-store/global.slice";
 
 const RecentJobsection = () => {
   const { data: recentJob, isLoading, isError } = useGetRecentJobsQuery();
-  console.log("recentJob", useGetRecentJobsQuery());
+  const [saveJob, { isLoading: isSaving }] = usePostSaveJobMutation();
+  const [likedJobs, setLikedJobs] = useState<string[]>([]);
+  const dispatch = useDispatch();
+
+  // Function to toggle like state
+  const handleLikeToggle = async (jobId: string) => {
+    // Toggle liked state
+    if (likedJobs.includes(jobId)) {
+      setLikedJobs(likedJobs.filter((id) => id !== jobId));
+    } else {
+      setLikedJobs([...likedJobs, jobId]);
+    }
+
+    try {
+      // Call API to save job if liked
+      if (!likedJobs.includes(jobId)) {
+        const res = await saveJob({ job_id: jobId });
+        dispatch(fetchRecentJobsStart());
+
+        // Show success sweet alert on successful save
+        Swal.fire({
+          icon: "success",
+          title: "Job Saved Successfully!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      }
+    } catch (error: any) {
+      console.error("Error saving job:", error);
+      // Show error sweet alert on error
+      Swal.fire({
+        icon: "error",
+        title: "Error Saving Job",
+        text: error?.message || "Something went wrong.",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
+  // // Render loading state if data is still loading
+  // if (isLoading) return <div>Loading...</div>;
+
+  // // Render error message if there's an error fetching data
+  // if (isError) return <div>Error fetching data</div>;
+
   return (
     <div className="section-full bg-white content-inner-2">
       <div className="container">
@@ -26,49 +75,66 @@ const RecentJobsection = () => {
         <div className="row">
           <div className="col-lg-9">
             <ul className="post-job-bx browse-job">
-              {recentJob?.data?.map((item: JobPost, index: number) => (
+              {recentJob?.data?.map((item: RecentJobData, index: number) => (
                 <li key={index}>
+<<<<<<< HEAD
                   <div className="post-bx">
                     <div className="d-flex m-b30">  
                       <div className="job-post-company">
                         <span>
                           <Image alt="" src={item.image} />
                         </span>
+=======
+                  {item && (
+                    <div className="post-bx">
+                      <div className="d-flex m-b30">
+                        <div className="job-post-company">
+                          <span>
+                            <Image alt="image" src={""} />
+                          </span>
+                        </div>
+                        <div className="job-post-info">
+                          <h4>
+                            <Link href="/job-detail">{item?.job_title}</Link>
+                          </h4>
+                          <ul>
+                            <li>
+                              <i className="fa fa-map-marker"></i>
+                              {item?.address}
+                            </li>
+                            <li>
+                              <i className="fa fa-bookmark-o"></i>
+                              {item?.location?.title}
+                            </li>
+                            <li>
+                              <i className="fa fa-clock-o"></i> Published{" "}
+                              {formaterDate(item?.created_at)}
+                            </li>
+                          </ul>
+                        </div>
+>>>>>>> 46fc85cc201ee5018795a061f83aae9c544fbef9
                       </div>
-                      <div className="job-post-info">
-                        <h4>
-                          <Link href="/job-detail">{item.title}</Link>
-                        </h4>
-                        <ul>
-                          <li>
-                            <i className="fa fa-map-marker"></i> Sacramento,
-                            California
-                          </li>
-                          <li>
-                            <i className="fa fa-bookmark-o"></i> Full Time
-                          </li>
-                          <li>
-                            <i className="fa fa-clock-o"></i> Published 11
-                            months ago
-                          </li>
-                        </ul>
+                      <div className="d-flex">
+                        <div className="job-time mr-auto">
+                          <Link href="">
+                            <span>{item?.location?.title}</span>
+                          </Link>
+                        </div>
+                        <div className="salary-bx">
+                          <span>$1200 - $ 2500</span>
+                        </div>
                       </div>
+                      <label
+                        className={`like-btn ${
+                          likedJobs.includes(item.id.toString()) ? "liked" : ""
+                        }`}
+                        onClick={() => handleLikeToggle(item.id.toString())}
+                      >
+                        <input type="checkbox" />
+                        <span className="checkmark"></span>
+                      </label>
                     </div>
-                    <div className="d-flex">
-                      <div className="job-time mr-auto">
-                        <Link href="">
-                          <span>Full Time</span>
-                        </Link>
-                      </div>
-                      <div className="salary-bx">
-                        <span>$1200 - $ 2500</span>
-                      </div>
-                    </div>
-                    <label className="like-btn">
-                      <input type="checkbox" />
-                      <span className="checkmark"></span>
-                    </label>
-                  </div>
+                  )}
                 </li>
               ))}
             </ul>
