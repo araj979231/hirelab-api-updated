@@ -36,7 +36,7 @@ import { AnyNaptrRecord } from "dns";
 const hirelabEnhancedSlice = hirelabApiSlice.enhanceEndpoints({
   addTagTypes: [
     "Blogs",
-    "BlogsbyId",
+    "BlogsByTitle",
     "Events",
     "Sector",
     "RecentJobs",
@@ -77,9 +77,9 @@ const globalApi = hirelabEnhancedSlice.injectEndpoints({
       query: queries.getBlogs.query,
       providesTags: ["Blogs"],
     }),
-    getBlogsDataById: builder.mutation<BlogResponse, string>({
-      query: (id) => queries.getBlogsById.query(id),
-      invalidatesTags: ["BlogsbyId"],
+    getBlogsByTitle: builder.mutation<BlogResponse, string>({
+      query: (id) => queries.getBlogsByTitle.query(id),
+      invalidatesTags: ["BlogsByTitle"],
     }),
     getEvents: builder.query<EventResponse, void>({
       query: queries.getEvents.query,
@@ -214,7 +214,7 @@ const globalApi = hirelabEnhancedSlice.injectEndpoints({
 
 export const {
   useGetBlogsDataQuery,
-  useGetBlogsDataByIdMutation,
+  useGetBlogsByTitleMutation,
   useGetEventsQuery,
   useGetSectorQuery,
   useGetRecentJobsQuery,

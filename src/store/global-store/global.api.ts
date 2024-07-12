@@ -4,6 +4,7 @@ import {
   SaveJobData,
   WritableBuyPassData,
 } from "@/types/index";
+import { title } from "process";
 
 export const queries = {
   getBlogs: {
@@ -12,9 +13,9 @@ export const queries = {
       method: "GET",
     }),
   },
-  getBlogsById: {
-    query: (id: string) => ({
-      url: `api/blogs/${id}`,
+  getBlogsByTitle: {
+    query: (title: string) => ({
+      url: `api/blogs/${title}`,
       method: "GET",
     }),
   },
@@ -194,7 +195,7 @@ export const queries = {
       method: "GET",
     }),
   },
-
+ 
   //Post===================================================================================>
 
   buyPassForEvent: {

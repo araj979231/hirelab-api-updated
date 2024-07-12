@@ -5,6 +5,8 @@ import Image  from 'next/image';
 import Link from 'next/link'
 var bnr = require('./../../images/banner/bnr1.jpg');
 
+
+
 function singleBlog(){
 	return(
 		<>
