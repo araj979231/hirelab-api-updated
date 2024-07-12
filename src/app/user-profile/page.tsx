@@ -1,21 +1,17 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import profilePic from "../../../public/images/pic.png"; // Update the path to the profile picture
-import { toast } from "react-toastify";
-import axios from "axios";
-import { LOGOUT_URL } from "@/lib/apiEndPoints";
-import { signOut } from "next-auth/react";
-// import { useRouter } from "next/navigation";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
+import { useAuthToken } from "@/hooks/useAuthToken";
 
-export const ProfileDropdown = ({ sessionUser }: any) => {
-  // console.log('profi;e',sessionUser);
+export const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   // const router = useRouter();
-  const { user } = useLoggedInUser();
+  const { user,refetch } = useLoggedInUser();
+  // const { token } = useAuthToken();
+
+  console.log('user', user)
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
@@ -50,7 +46,6 @@ export const ProfileDropdown = ({ sessionUser }: any) => {
         }
         .profile-name {
           color: #000;
-          font-family: Lato;
           font-size: 14px;
           font-style: normal;
           font-weight: 600;
@@ -103,7 +98,6 @@ export const ProfileDropdown = ({ sessionUser }: any) => {
           justify-content: start;
           gap: 10px;
           color: #232323 !important;
-          font-family: Lato;
           font-size: 16px;
           font-style: normal;
           font-weight: 400;
