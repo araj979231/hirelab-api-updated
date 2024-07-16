@@ -1,13 +1,29 @@
-import React from 'react';
+"use client"
+import React,{useEffect} from 'react';
 import Sidebar from '../../markup/Element/Sidebar'
 //Images
 import Image  from 'next/image';
 import Link from 'next/link'
 var bnr = require('./../../images/banner/bnr1.jpg');
-
+import {useGetBlogsByTitleMutation} from '@/store/global-store/global.query'
+import { useAccordionButton } from 'react-bootstrap';
+import { useSearchParams } from 'next/navigation';
 
 
 function singleBlog(){
+	const searchparams = useSearchParams()
+	const query = searchparams.get("query")
+	const encodedTitle = encodeURIComponent(query).replace(/%20/g, "+");
+	console.log("encodedTitle",query )
+
+	const [getBlogsByTitle, {data : getBlogTitleData}] = useGetBlogsByTitleMutation()
+	console.log("getBlogTitleData", getBlogTitleData)
+
+	useEffect(()=>{
+		if(encodedTitle){
+			getBlogsByTitle(encodedTitle)
+		}
+	},[getBlogsByTitle,searchparams,encodedTitle])
 	return(
 		<>
 			<div className="page-content bg-white">

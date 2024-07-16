@@ -10,6 +10,8 @@ import { Blog } from '@/types/blog';
 import bnr from './../../images/banner/bnr1.jpg';
 import { useRouter } from "next/navigation";
 
+// git pull origin main
+
 const Blogs = () => {
   const router = useRouter(); // Using useRouter directly
 
