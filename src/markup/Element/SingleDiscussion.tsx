@@ -1,21 +1,50 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Sidebar from "../../markup/Element/Sidebar";
 import Image from "next/image";
 import Link from "next/link";
 import bnr from "../../images/banner/bnr1.jpg";
-import { useGetSingleDiscussionByTitleMutation } from "@/store/global-store/global.query";
+import {
+  useGetSingleDiscussionByTitleMutation,
+  useCreateCommentMutation,
+  useGetCommentForQuetionMutation,
+  useDeleteCommentByIdMutation,
+  useGetCommentForParentCommentMutation
+} from "@/store/global-store/global.query";
+import { IMAGE_URL } from "@/lib/apiEndPoints";
 import Loading from "@/components/Loading";
+import { faComment, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { CommentSection } from "react-comments-section";
+import "react-comments-section/dist/index.css";
+import { useLoggedInUser } from '@/hooks/index';
+
+interface Comment {
+  userId: string;
+  comId: string;
+  fullName: string;
+  userProfile: string;
+  text: string;
+  avatarUrl: string;
+  replies: Comment[];
+}
 
 const SingleDiscussion = () => {
   const searchParams = useSearchParams();
   const query = searchParams.get("query");
+  const { user } = useLoggedInUser();
 
   const [
     getSingleDiscussionByTitle,
     { data: singleDiscussion, isLoading, isError, isSuccess, error },
   ] = useGetSingleDiscussionByTitleMutation();
+
+  const [createComment] = useCreateCommentMutation();
+  const [deleteComment] = useDeleteCommentByIdMutation();
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [getCommentsForQuestion, { data: commentsData }] =
+    useGetCommentForQuetionMutation();
+    console.log('commentsData', commentsData)
 
   useEffect(() => {
     if (query) {
@@ -23,12 +52,106 @@ const SingleDiscussion = () => {
     }
   }, [getSingleDiscussionByTitle, query]);
 
+  useEffect(() => {
+    if (singleDiscussion && singleDiscussion.data) {
+      const questionId = singleDiscussion.data.id.toString();
+      getCommentsForQuestion(questionId);
+    }
+  }, [singleDiscussion, getCommentsForQuestion]);
+
+  useEffect(() => {
+    if (commentsData && commentsData.data) {
+      const formatComments = (comments: any[]): any[] => {
+        return comments.map((comment) => ({
+          userId: comment?.user?.id,
+          comId: comment?.id?.toString(),
+          fullName: comment?.user?.name,
+          userProfile: `${IMAGE_URL + comment?.user?.image}`,
+          text: comment?.body,
+          avatarUrl: `${IMAGE_URL + comment?.user?.image}`,
+          replies: formatComments(comment?.comments|| []), // Recursively format replies
+        }));
+      };
+      const formattedComments = formatComments(commentsData?.data.map((item: any) => item.comments).flat());
+      console.log('formattedComments', formattedComments)
+      setComments(formattedComments);
+    }
+  }, [commentsData]);
+
+  const handleCommentSubmit = async (data: any) => {
+    const { text, comId: parentId } = data;
+    const question_id = singleDiscussion?.data?.id?.toString();
+    const payload = {
+      question_id,
+      body: text,
+      parent_comment_id: parentId || null,
+    };
+
+    try {
+      const res = await createComment(payload).unwrap();
+
+      const newComment = {
+        userId: user?.user.id,
+        comId: res.id.toString(),
+        fullName: user?.user.name,
+        userProfile: `${IMAGE_URL + user?.user?.image}`,
+        text: text,
+        avatarUrl: `${IMAGE_URL + user?.user?.image}`,
+        replies: [],
+      };
+
+      if (parentId) {
+        const updatedComments = comments.map((comment) => {
+          if (comment.comId === parentId) {
+            return {
+              ...comment,
+              replies: [...comment.replies, newComment],
+            };
+          }
+          return comment;
+        });
+        setComments(updatedComments);
+      } else {
+        setComments([...comments, newComment]);
+      }
+    } catch (error) {
+      console.error("Failed to post comment", error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: any) => {
+    const { comIdToDelete, parentOfDeleteId } = commentId;
+    console.log('commentId', commentId);
+    try {
+      await deleteComment(comIdToDelete).unwrap();
+      const deleteReplies: any = (replies: Comment[], commentId: string) => {
+        return replies
+          .filter((reply) => reply.comId !== commentId)
+          .map((reply) => ({
+            ...reply,
+            replies: deleteReplies(reply.replies, commentId),
+          }));
+      };
+
+      const updatedComments = comments
+        .filter((comment) => comment.comId !== commentId)
+        .map((comment) => ({
+          ...comment,
+          replies: deleteReplies(comment.replies, commentId),
+        }));
+
+      setComments(updatedComments);
+    } catch (error) {
+      console.error("Failed to delete comment", error);
+    }
+  };
+
   if (isLoading) {
     return <Loading />;
   }
+
   if (isSuccess && singleDiscussion) {
-    const { created_at, question, description, user, likes, comments, views } =
-      singleDiscussion.data;
+    const { question, description } = singleDiscussion.data;
     return (
       <>
         <div className="page-content bg-white">
@@ -53,45 +176,154 @@ const SingleDiscussion = () => {
           <div className="content-area">
             <div className="container">
               <div className="row">
-                <div className="col-lg-8 col-md-7 m-b10">
+                <div className="col-lg-9 col-md-8 m-b10">
+                  <h2>{question}</h2>
+                  <p>{description}</p>
                   <div className="blog-post blog-single blog-style-1">
-                    <div className="dez-post-meta">
-                      <ul className="d-flex align-items-center">
-                        <li className="post-date">
-                          <i className="fa fa-calendar"></i>
-                          {created_at}
-                        </li>
-                        <li className="post-author">
-                          <i className="fa fa-user"></i>
-                          {user?.name}
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="dez-post-title">
-                      <h4 className="post-title m-t0">{question}</h4>
-                    </div>
-                    <div className="dez-post-media dez-img-effect zoom-slow m-t20">
-                      <Image
-                        src={bnr.src}
-                        alt={question}
-                        width={600}
-                        height={400}
-                      />
-                    </div>
-                    <div className="dez-post-text">
-                      <p>{description}</p>
-                    </div>
-                    <div className="d-flex justify-content-between align-items-center mt-3">
-                      <div className="d-flex align-items-center">
-                        <span className="mr-3">❤️ {likes}</span>
-                        <span className="mr-3">💬 {comments}</span>
-                        <span>👀 {views}</span>
-                      </div>
-                    </div>
+                    <CommentSection
+                      currentUser={{
+                        currentUserId: `${user?.user.id}`,
+                        currentUserImg: `${IMAGE_URL + user?.user?.image}`,
+                        currentUserProfile: `${IMAGE_URL + user?.user?.image}`,
+                        currentUserFullName: `${user?.user.name}`,
+                      }}
+                      logIn={{
+                        loginLink: "/login",
+                        signupLink: "/signup",
+                      }}
+                      commentData={comments}
+                      onSubmitAction={handleCommentSubmit}
+                      currentData={(data: any) => {
+                        console.log("current data", data);
+                      }}
+                      onDeleteAction={(commentId: string) =>
+                        handleDeleteComment(commentId)
+                      }
+                    />
                   </div>
                 </div>
-                <div className="col-lg-4 col-md-5 sticky-top">
-                  <Sidebar />
+                <div className="col-lg-3 col-md-4 sticky-top">
+                  <div className="suggested-topics-wrap shadow p-3">
+                    <div>
+                      <h5>Suggested Topics</h5>
+                      <hr />
+                    </div>
+                    <div>
+                      <div className="sugg-comment-topic">
+                        <h6>How To Study in the Top College</h6>
+                        <div className="sugg-topic-card-detail">
+                          <div className="d-flex disc-date-suggest">
+                            <div className="">
+                              <span className="badge-category-bg"></span>
+                              <span>MBA</span>
+                            </div>
+                            <div>
+                              <span>Oct '23</span>
+                            </div>
+                          </div>
+                          <div className="disc-date-suggest">
+                            <span>12</span>
+                            <FontAwesomeIcon icon={faComment} />
+                          </div>
+                        </div>
+                      </div>
+                      <hr />
+                      <div className="sugg-comment-topic">
+                        <h6>How To Study in the Top College</h6>
+                        <div className="sugg-topic-card-detail">
+                          <div className="d-flex disc-date-suggest">
+                            <div className="">
+                              <span className="badge-category-bg"></span>
+                              <span>MBA</span>
+                            </div>
+                            <div>
+                              <span>Oct '23</span>
+                            </div>
+                          </div>
+                          <div className="disc-date-suggest">
+                            <span>12</span>
+                            <FontAwesomeIcon icon={faComment} />
+                          </div>
+                        </div>
+                      </div>
+                      <hr />
+                      <div className="sugg-comment-topic">
+                        <h6>How To Study in the Top College</h6>
+                        <div className="sugg-topic-card-detail">
+                          <div className="d-flex disc-date-suggest">
+                            <div className="">
+                              <span className="badge-category-bg"></span>
+                              <span>MBA</span>
+                            </div>
+                            <div>
+                              <span>Oct '23</span>
+                            </div>
+                          </div>
+                          <div className="disc-date-suggest">
+                            <span>12</span>
+                            <FontAwesomeIcon icon={faComment} />
+                          </div>
+                        </div>
+                      </div>
+                      <hr />
+                      <div className="sugg-comment-topic">
+                        <h6>How To Study in the Top College</h6>
+                        <div className="sugg-topic-card-detail">
+                          <div className="d-flex disc-date-suggest">
+                            <div className="">
+                              <span className="badge-category-bg"></span>
+                              <span>MBA</span>
+                            </div>
+                            <div>
+                              <span>Oct '23</span>
+                            </div>
+                          </div>
+                          <div className="disc-date-suggest">
+                            <span>12</span>
+                            <FontAwesomeIcon icon={faComment} />
+                          </div>
+                        </div>
+                      </div>
+                      <hr />
+                      <div className="sugg-comment-topic">
+                        <h6>How To Study in the Top College</h6>
+                        <div className="sugg-topic-card-detail">
+                          <div className="d-flex disc-date-suggest">
+                            <div className="">
+                              <span className="badge-category-bg"></span>
+                              <span>MBA</span>
+                            </div>
+                            <div>
+                              <span>Oct '23</span>
+                            </div>
+                          </div>
+                          <div className="disc-date-suggest">
+                            <span>12</span>
+                            <FontAwesomeIcon icon={faComment} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="my-5">
+                      <p className="suggested-topics-message">
+                        <b>Want to read more? Browse other topics in </b>
+                        <Link
+                          className="badge-wrapper bullet d-inline-block"
+                          href="/c/mba/373"
+                        >
+                          <div className="">
+                            <span className="badge-category-bg"></span>
+                            <span>MBA</span>
+                          </div>
+                        </Link>{" "}
+                        or{" "}
+                        <Link href="/latest" style={{ color: "blue" }}>
+                          view latest topics
+                        </Link>
+                        .
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 import React from 'react';
 import Link from 'next/link';
@@ -429,3 +430,22 @@ export default Blogs;
 // };
 
 // export default Blogs;
+=======
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+import Loading from "@/components/Loading";
+
+const BlogDetailGrid = dynamic(
+  () => import("@/markup/Element/BlogDetailGrid"),
+  {
+    ssr: false,
+    loading: () => <Loading />,
+  }
+);
+
+const BlogDetailGridPage = () => {
+  return <BlogDetailGrid />;
+};
+
+export default BlogDetailGridPage;
+>>>>>>> 72ae546e7e12cf8a2d6d8175589c2465a0d73faa

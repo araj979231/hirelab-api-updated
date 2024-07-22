@@ -27,11 +27,11 @@ import {
   Filters,
   WritableBuyPassData,
   WritableBuyPassResponse,
+  CreateCommentType
 } from "@/types/index";
 
 import { hirelabApiSlice } from "@/rtk/base-query";
 import { queries } from "./global.api";
-import { AnyNaptrRecord } from "dns";
 
 const hirelabEnhancedSlice = hirelabApiSlice.enhanceEndpoints({
   addTagTypes: [
@@ -69,6 +69,11 @@ const hirelabEnhancedSlice = hirelabApiSlice.enhanceEndpoints({
     "BuyPassForEvent",
     "GetJobUserById",
     "CTCDataById",
+    "DeleteAppliedJobs",
+    "DeleteCommentById",
+    "GetCommentForQuetion",
+    "GetCommentForParentComment",
+    "CreateComment"
   ],
 });
 
@@ -213,6 +218,30 @@ const globalApi = hirelabEnhancedSlice.injectEndpoints({
       query: (queryParams) => queries.getJobUserById.query(queryParams),
       invalidatesTags: ["GetJobUserById"],
     }),
+    deleteAppliedJob: builder.mutation<any, string>({
+      query: (jobId) => queries.deleteAppliedJob.query(jobId),
+      invalidatesTags: ["DeleteAppliedJobs"],
+    }),
+    getCommentForQuetion: builder.mutation<any, string>({
+      query: (questionId) => queries.getCommentForQuetion.query(questionId),
+      invalidatesTags: ["GetCommentForQuetion"],
+    }),
+    deleteCommentById: builder.mutation<any, string>({
+      query: (commentId) => queries.deleteCommentById.query(commentId),
+      invalidatesTags: ["DeleteCommentById"],
+    }),
+    getCommentForParentComment: builder.mutation<
+      any,
+      { questionId: string; commentId: string }
+    >({
+      query: ({ questionId, commentId }) =>
+        queries.getCommentForParentComment.query(questionId, commentId),
+      invalidatesTags: ["GetCommentForParentComment"],
+    }),
+    createComment : builder.mutation<any, CreateCommentType>({
+      query :(data)=> queries.createComment.query(data),
+      invalidatesTags: ["CreateComment"],
+    })
   }),
   overrideExisting: true,
 });
@@ -251,6 +280,11 @@ export const {
   useGetFilterJobMutation,
   useBuyPassForEventMutation,
   useGetJobUserByIdMutation,
-  useGetCtcDataByIdMutation
+  useGetCtcDataByIdMutation,
+  useDeleteAppliedJobMutation,
+  useDeleteCommentByIdMutation,
+  useGetCommentForParentCommentMutation,
+  useGetCommentForQuetionMutation,
+  useCreateCommentMutation
 } = globalApi;
 export default globalApi;

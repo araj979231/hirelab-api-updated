@@ -3,6 +3,7 @@ import {
   Filters,
   SaveJobData,
   WritableBuyPassData,
+  CreateCommentType,
 } from "@/types/index";
 import { title } from "process";
 
@@ -13,9 +14,15 @@ export const queries = {
       method: "GET",
     }),
   },
+<<<<<<< HEAD
   getBlogsByTitle: {
     query: (title: string) => ({
       url: `api/blogs/${title}`,
+=======
+  getBlogsById: {
+    query: (id: string) => ({
+      url: `api/blog/${id}`,
+>>>>>>> 72ae546e7e12cf8a2d6d8175589c2465a0d73faa
       method: "GET",
     }),
   },
@@ -49,11 +56,11 @@ export const queries = {
       method: "GET",
     }),
   },
-  getCtcDataById :{
-    query :(id :string)=>({
+  getCtcDataById: {
+    query: (id: string) => ({
       url: `api/get-ctc-base-job/${id}`,
       method: "GET",
-    })
+    }),
   },
   getCollage: {
     query: () => ({
@@ -195,13 +202,40 @@ export const queries = {
       };
     },
   },
-  getJobUserById : {
+  getJobUserById: {
     query: (id: string) => ({
       url: `api/get-job-users/${id}`,
       method: "GET",
     }),
   },
+<<<<<<< HEAD
  
+=======
+  deleteAppliedJob: {
+    query: (id: string) => ({
+      url: `api/delete-applied-job/${id}`,
+      method: "GET",
+    }),
+  },
+  getCommentForQuetion: {
+    query: (id: string) => ({
+      url: `api/get-comments-for-question/${id}`,
+      method: "GET",
+    }),
+  },
+  getCommentForParentComment: {
+    query: (quetionId: string, commentId: string) => ({
+      url: `api/get-comments-for-parent-comment/${quetionId}/${commentId}`,
+      method: "GET",
+    }),
+  },
+  deleteCommentById: {
+    query: (id: string) => ({
+      url: `api/delete-comment/${id}`,
+      method: "GET",
+    }),
+  },
+>>>>>>> 72ae546e7e12cf8a2d6d8175589c2465a0d73faa
   //Post===================================================================================>
 
   buyPassForEvent: {
@@ -224,6 +258,13 @@ export const queries = {
       url: "api/saved-job",
       method: "POST",
       body: id,
+    }),
+  },
+  createComment: {
+    query: (commentData: CreateCommentType) => ({
+      url: "api/create-comment",
+      method: "POST",
+      body: commentData,
     }),
   },
 };
